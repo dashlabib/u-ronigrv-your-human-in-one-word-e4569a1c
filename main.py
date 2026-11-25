@@ -13,24 +13,25 @@ WORD = "Magpie"
 DEFAULT_OUTPUT = Path("/output/entry.txt")
 
 
+def validate_word(text: str) -> None:
+    """Enforce the bounty gate: one token, 1-30 chars, non-whitespace."""
+    if not (1 <= len(text) <= 30) or text.strip() != text or len(text.split()) != 1:
+        raise ValueError(f"invalid entry word: {text!r}")
+
+
 def write_entry(path: Path) -> None:
+    validate_word(WORD)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(WORD.encode("utf-8"))
 
 
 def self_test() -> int:
-    text = WORD
-    problems = []
-    if not (1 <= len(text) <= 30):
-        problems.append(f"length {len(text)} outside 1-30")
-    if not text.strip():
-        problems.append("only whitespace")
-    if len(text.split()) != 1:
-        problems.append("not a single word")
-    if problems:
-        print("SELF-TEST FAILED: " + "; ".join(problems), file=sys.stderr)
+    try:
+        validate_word(WORD)
+    except ValueError as exc:
+        print(f"SELF-TEST FAILED: {exc}", file=sys.stderr)
         return 1
-    print(f"SELF-TEST OK: {text!r} ({len(text.encode())} bytes)")
+    print(f"SELF-TEST OK: {WORD!r} ({len(WORD.encode())} bytes)")
     return 0
 
 
